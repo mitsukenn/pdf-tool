@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Streamlit
+.streamlit/
+
+# Local Poppler binaries (Windows)
+# GitHubには上げない（サイズが大きいため）
+poppler/
+Release-25.12.0-0/
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
