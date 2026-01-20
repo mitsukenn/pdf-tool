@@ -8,14 +8,18 @@ import re
 
 def sanitize_filename(filename):
     """
-    Windowsなどで問題になりやすい記号をサニタイズする
+    Windowsセキュリティの誤検知を防ぐため、英数字と日本語以外を徹底的に排除する
     """
-    # NTFS禁止文字や記号をアンダースコアに置換
-    s = re.sub(r'[\\/:*?"<>|：「」]', '_', filename)
-    # スペースも置換
-    s = re.sub(r'\s+', '_', s)
-    # 長すぎると問題になるのでカット（拡張子考慮して100文字程度）
-    return s[:100]
+    # 許可する文字以外をアンダースコアに置換
+    # [^...] は否定文字クラス。 \u... は日本語の範囲。
+    # A-Za-z0-9_-: 英数字、アンダースコア、ハイフン
+    s = re.sub(r'[^\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbfA-Za-z0-9_-]', '_', filename)
+    # 連続するアンダースコアを統合
+    s = re.sub(r'_+', '_', s)
+    # 前後のアンダースコアを削除
+    s = s.strip('_')
+    # 長すぎを防止。空文字なら'file'
+    return s[:80] if s else 'file'
 
 # --- 設定 ---
 import platform
