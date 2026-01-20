@@ -4,6 +4,18 @@ from PIL import Image
 import io
 import zipfile
 import os
+import re
+
+def sanitize_filename(filename):
+    """
+    Windowsなどで問題になりやすい記号をサニタイズする
+    """
+    # NTFS禁止文字や記号をアンダースコアに置換
+    s = re.sub(r'[\\/:*?"<>|：「」]', '_', filename)
+    # スペースも置換
+    s = re.sub(r'\s+', '_', s)
+    # 長すぎると問題になるのでカット（拡張子考慮して100文字程度）
+    return s[:100]
 
 # --- 設定 ---
 import platform
@@ -112,16 +124,20 @@ if uploaded_files:
                                 save_params["progressive"] = True
                             
                             image.save(img_byte_arr, format=pil_format, **save_params)
-                            zip_file.writestr(f"{base_file_name}_p_{i + 1:03}.{ext}", img_byte_arr.getvalue())
+                            sanitized_base_name = sanitize_filename(base_file_name)
+                            zip_file.writestr(f"{sanitized_base_name}_p_{i + 1:03}.{ext}", img_byte_arr.getvalue())
 
                     final_zip_bytes = zip_buffer.getvalue()
                     width, height = processed_pdf_images[0].size
+                    
+                    # ファイル名のサニタイゼーション
+                    sanitized_base_name = sanitize_filename(base_file_name)
 
                     # 結果をセッション状態に保存
                     st.session_state['conversion_results'][uploaded_file.name] = {
                         "final_zip_bytes": final_zip_bytes,
                         "compressed_pdf_bytes": compressed_pdf_bytes,
-                        "base_file_name": base_file_name,
+                        "base_file_name": sanitized_base_name,
                         "num_pages": len(images),
                         "width": width,
                         "height": height,
