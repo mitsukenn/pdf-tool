@@ -106,7 +106,7 @@ if uploaded_files:
                                     save_params["progressive"] = True
                                 
                                 image.save(img_byte_arr, format=pil_format, **save_params)
-                                zip_file.writestr(f"page_{i + 1:03}.{ext}", img_byte_arr.getvalue())
+                                zip_file.writestr(f"{base_file_name}_p_{i + 1:03}.{ext}", img_byte_arr.getvalue())
 
                         final_zip_bytes = zip_buffer.getvalue()
 
